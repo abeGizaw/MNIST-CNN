@@ -234,6 +234,7 @@ class Accuracy:
 
 class AccuracyCategorical(Accuracy):
     def __init__(self, *, binary=False):
+        super().__init__()
         self.binary = binary
 
     # Does not do anything

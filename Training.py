@@ -25,5 +25,5 @@ model.set(loss = LossCategoricalCrossEntropy(),
           optimizer = OptimizerSGD(learning_rate = 0.5),
           accuracy = AccuracyCategorical())
 model.finalize()
-model.train(X_train, train_labels, epochs=100,print_every=10)
+model.train(X_train, train_labels, epochs=100,print_every=1000, batch_size = 128)
 model.validate(validation_data = (X_test, test_labels))

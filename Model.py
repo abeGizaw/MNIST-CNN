@@ -62,7 +62,7 @@ class Model:
             self.softmax_classifier_output = \
                 ActivationSoftmax_Loss_CategoricalCrossEntropy()
 
-    def train(self, X, y, *, epochs=1, batch_size = None, print_every=1):
+    def train(self, X, y, *, epochs=1, batch_size = None, print_every=100):
         # Initialize accuracy object
         self.accuracy.init(y)
 
@@ -74,7 +74,7 @@ class Model:
 
             # Add a step for leftover data
             if train_steps * batch_size < len(X):
-                batch_size += 1
+                train_steps += 1
 
         for epoch in range(1, epochs + 1):
             self.loss.new_pass()
@@ -86,8 +86,11 @@ class Model:
                     batch_X = X
                     batch_y = y
                 else:
-                    batch_X = X[step*batch_size:(step + 1)*batch_size]
+                    batch_X = X[step*batch_size:(step+1)*batch_size]
                     batch_y = y[step*batch_size:(step+1)*batch_size]
+
+                # print(batch_X)
+                # print(batch_y)
 
                 # Perform the forward pass
                 output = self.forward(batch_X)
@@ -99,13 +102,14 @@ class Model:
                 predictions = self.output_layer_activation.predictions(output)
                 accuracy = self.accuracy.calculate(predictions, batch_y)
 
+                # Backward pass
                 self.backward(output, batch_y)
 
                 for layer in self.trainable_layers:
                     self.optimizer.update_params(layer)
 
 
-                if batch_size is not None and step % (batch_size // 8) == 0:
+                if batch_size is not None and step % print_every == 0:
                     print(f'step:{step}, acc:{accuracy:.3f}, loss:{loss:.3f}')
 
             epoch_data_loss = self.loss.calculate_accumulated()
