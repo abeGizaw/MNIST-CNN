@@ -95,10 +95,28 @@ class ActivationSoftmax:
 
 
 class Loss:
+    def __init__(self):
+        self.accumulated_count = 0
+        self.accumulated_sum = 0
+
     def calculate(self, output, expectedOutput):
         sample_losses = self.forward(output, expectedOutput)
         data_loss = np.mean(sample_losses)
+
+        # For batch/epoch statistics
+        self.accumulated_sum += np.sum(sample_losses)
+        self.accumulated_count += len(sample_losses)
         return data_loss
+
+    # Calculate accumulated loss
+    def calculate_accumulated(self):
+        data_loss = self.accumulated_sum / self.accumulated_count
+        return data_loss
+
+    # Reset variables for each new epoch
+    def new_pass(self):
+        self.accumulated_count = 0
+        self.accumulated_sum = 0
 
     @abstractmethod
     def forward(self, output, expectedOutput):
@@ -186,10 +204,28 @@ class OptimizerSGD:
 
 class Accuracy:
 
+    def __init__(self):
+        self.accumulated_sum = 0
+        self.accumulated_count = 0
+
     def calculate(self, predictions, y):
         comparisons = self.compare(predictions, y)
         accuracy = np.mean(comparisons)
+
+        self.accumulated_sum += np.sum(comparisons)
+        self.accumulated_count += len(comparisons)
         return accuracy
+
+    # Calculate accumulated accuracy
+    def calculate_accumulated(self):
+        accuracy = self.accumulated_sum / self.accumulated_count
+        return accuracy
+
+    # Reset variables for each new epoch
+    def new_pass(self):
+        self.accumulated_count = 0
+        self.accumulated_sum = 0
+
 
     @abstractmethod
     def compare(self, predictions, y):

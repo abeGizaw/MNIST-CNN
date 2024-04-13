@@ -1,9 +1,7 @@
-import numpy as np
 from LoadData import load_mnist_images, load_mnist_labels, formatData
 from FeedForward import (DenseLayer, ActivationReLU, LossCategoricalCrossEntropy,
                             ActivationSoftmax, OptimizerSGD,AccuracyCategorical)
 from Model import Model
-
 
 # Load and format the data
 train_images = load_mnist_images('MNISTdata\\train-images-idx3-ubyte')
@@ -24,10 +22,8 @@ model.add(ActivationReLU())
 model.add(DenseLayer(64, 10))
 model.add(ActivationSoftmax())
 model.set(loss = LossCategoricalCrossEntropy(),
-          optimizer = OptimizerSGD(learning_rate = 0.45),
+          optimizer = OptimizerSGD(learning_rate = 0.5),
           accuracy = AccuracyCategorical())
 model.finalize()
-model.train(X_train, train_labels, epochs=100,
-                  print_every=100,
-                  validation_data = (X_test, test_labels)
-            )
+model.train(X_train, train_labels, epochs=100,print_every=10)
+model.validate(validation_data = (X_test, test_labels))

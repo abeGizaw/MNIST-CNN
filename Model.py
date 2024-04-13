@@ -1,10 +1,13 @@
 from FeedForward import (LossCategoricalCrossEntropy, ActivationSoftmax,
                          ActivationSoftmax_Loss_CategoricalCrossEntropy, InputLayer)
+
+
+
+
 class Model:
     def __init__(self):
         self.layers = []
         self.input_layer = None
-
         self.trainable_layers = []
         self.accuracy = None
         self.optimizer = None
@@ -12,7 +15,10 @@ class Model:
 
         self.softmax_classifier_output = None
         self.output_layer_activation = None
-
+        self.y_val = None
+        self.X_val = None
+        self.validation_steps = 1
+        self.train_steps = 1
     def add(self, layer):
         self.layers.append(layer)
 
@@ -21,6 +27,7 @@ class Model:
         self.loss = loss
         self.optimizer = optimizer
         self.accuracy = accuracy
+
 
     # Finalizes the model, setting the next and previous layers
     def finalize(self):
@@ -57,42 +64,109 @@ class Model:
             self.softmax_classifier_output = \
                 ActivationSoftmax_Loss_CategoricalCrossEntropy()
 
-    def train(self, X, y, *, epochs=1, print_every=1, validation_data=None):
 
+    def calculateSteps(self, batch_size, X, X_val, validation_data):
+        # Calculate number of steps
+        if batch_size is not None:
+            # Number of batches being trained
+            self.train_steps = len(X) // batch_size
+
+            # Add a step for leftover data
+            if self.train_steps * batch_size < len(X):
+                batch_size += 1
+
+            if validation_data is not None:
+                self.validation_steps = len(X_val) // batch_size
+                if self.validation_steps * batch_size < len(X_val):
+                    self.validation_steps += 1
+
+        return self.train_steps, self.validation_steps
+
+    def train(self, X, y, *, epochs=1, batch_size = None, print_every=1):
         # Initialize accuracy object
         self.accuracy.init(y)
 
+
+        # Calculate number of steps
+        if batch_size is not None:
+            # Number of batches being trained
+            self.train_steps = len(X) // batch_size
+
+            # Add a step for leftover data
+            if self.train_steps * batch_size < len(X):
+                batch_size += 1
+
         for epoch in range(1, epochs + 1):
-            # Perform the forward pass
-            output = self.forward(X)
+            self.loss.new_pass()
+            self.accuracy.new_pass()
 
-            # Calculate loss
-            loss = self.loss.calculate(output, y)
+            for step in range(self.train_steps):
+                # Figure out data to train on
+                if batch_size is None:
+                    batch_X = X
+                    batch_y = y
+                else:
+                    batch_X = X[step*batch_size:(step + 1)*batch_size]
+                    batch_y = y[step*batch_size:(step+1)*batch_size]
 
-            # Get predictions and calculate accuracy
-            predictions = self.output_layer_activation.predictions(output)
-            accuracy = self.accuracy.calculate(predictions, y)
+                # Perform the forward pass
+                output = self.forward(batch_X)
 
-            self.backward(output, y)
+                # Calculate loss
+                loss = self.loss.calculate(output, batch_y)
 
-            for layer in self.trainable_layers:
-                self.optimizer.update_params(layer)
+                # Get predictions and calculate accuracy
+                predictions = self.output_layer_activation.predictions(output)
+                accuracy = self.accuracy.calculate(predictions, batch_y)
 
+                self.backward(output, batch_y)
+
+                for layer in self.trainable_layers:
+                    self.optimizer.update_params(layer)
+
+
+                if batch_size is not None and step % (batch_size // 8) == 0:
+                    print(f'step:{step}, acc:{accuracy:.3f}, loss:{loss:.3f}')
+
+            epoch_data_loss = self.loss.calculate_accumulated()
+            epoch_accuracy = self.accuracy.calculate_accumulated()
             if epoch % print_every == 0:
-                print(f'epoch:{epoch}, acc:{accuracy:.3f}, loss:{loss:.3f}')
+                print(f'epoch:{epoch}, acc:{epoch_accuracy:.3f}, loss:{epoch_data_loss:.3f}\n')
 
-        if validation_data is not None:
-            # Sample, target
-            X_val, y_val = validation_data
 
-            output = self.forward(X_val)
-            loss = self.loss.calculate(output, y_val)
+    def validate(self, *, validation_data, batch_size = None):
+        self.loss.new_pass()
+        self.accuracy.new_pass()
+        self.X_val, self.y_val = validation_data
+
+        if batch_size is not None:
+            self.validation_steps = len(self.X_val) // batch_size
+            if self.validation_steps * batch_size < len(self.X_val):
+                self.validation_steps += 1
+
+        for step in range(self.validation_steps):
+            # Figure out data to train on
+            if batch_size is None:
+                batch_X = self.X_val
+                batch_y = self.y_val
+            else:
+                batch_X = self.X_val[step * batch_size:(step + 1) * batch_size]
+                batch_y = self.y_val[step * batch_size:(step + 1) * batch_size]
+
+            output = self.forward(batch_X)
+            loss = self.loss.calculate(output, batch_y)
             predictions = self.output_layer_activation.predictions(output)
-            accuracy = self.accuracy.calculate(predictions, y_val)
+            accuracy = self.accuracy.calculate(predictions, batch_y)
 
-            print(
-                f'validation, acc:{accuracy:.3f}, loss:{loss:.3f}'
-            )
+            if batch_size is not None and step % (batch_size // 8) == 0:
+                print(
+                    f'validation, step:{step}, acc:{accuracy:.3f}, loss:{loss:.3f}'
+                )
+
+        validation_loss = self.loss.calculate_accumulated()
+        validation_accuracy = self.accuracy.calculate_accumulated()
+        print(f'final validation - acc:{validation_accuracy}, loss:{validation_loss}')
+
 
     def forward(self, X):
         # Pass in the input to the input layer
@@ -105,6 +179,7 @@ class Model:
 
         # The final layers output
         return self.layers[-1].output
+
 
     def backward(self, output, y):
         # If softmax classifier
@@ -127,3 +202,4 @@ class Model:
             # dinputs is now the parameter
             for layer in reversed(self.layers):
                 layer.backward(layer.next.dinputs)
+
