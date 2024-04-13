@@ -9,16 +9,14 @@ class Model:
         self.layers = []
         self.input_layer = None
         self.trainable_layers = []
+
+        # Layers we want to save off
         self.accuracy = None
         self.optimizer = None
         self.loss = None
-
         self.softmax_classifier_output = None
         self.output_layer_activation = None
-        self.y_val = None
-        self.X_val = None
-        self.validation_steps = 1
-        self.train_steps = 1
+
     def add(self, layer):
         self.layers.append(layer)
 
@@ -64,43 +62,25 @@ class Model:
             self.softmax_classifier_output = \
                 ActivationSoftmax_Loss_CategoricalCrossEntropy()
 
-
-    def calculateSteps(self, batch_size, X, X_val, validation_data):
-        # Calculate number of steps
-        if batch_size is not None:
-            # Number of batches being trained
-            self.train_steps = len(X) // batch_size
-
-            # Add a step for leftover data
-            if self.train_steps * batch_size < len(X):
-                batch_size += 1
-
-            if validation_data is not None:
-                self.validation_steps = len(X_val) // batch_size
-                if self.validation_steps * batch_size < len(X_val):
-                    self.validation_steps += 1
-
-        return self.train_steps, self.validation_steps
-
     def train(self, X, y, *, epochs=1, batch_size = None, print_every=1):
         # Initialize accuracy object
         self.accuracy.init(y)
 
-
         # Calculate number of steps
+        train_steps = 1
         if batch_size is not None:
             # Number of batches being trained
-            self.train_steps = len(X) // batch_size
+            train_steps = len(X) // batch_size
 
             # Add a step for leftover data
-            if self.train_steps * batch_size < len(X):
+            if train_steps * batch_size < len(X):
                 batch_size += 1
 
         for epoch in range(1, epochs + 1):
             self.loss.new_pass()
             self.accuracy.new_pass()
 
-            for step in range(self.train_steps):
+            for step in range(train_steps):
                 # Figure out data to train on
                 if batch_size is None:
                     batch_X = X
@@ -137,21 +117,22 @@ class Model:
     def validate(self, *, validation_data, batch_size = None):
         self.loss.new_pass()
         self.accuracy.new_pass()
-        self.X_val, self.y_val = validation_data
+        X_val, y_val = validation_data
 
+        validation_steps = 1
         if batch_size is not None:
-            self.validation_steps = len(self.X_val) // batch_size
-            if self.validation_steps * batch_size < len(self.X_val):
-                self.validation_steps += 1
+            validation_steps = len(X_val) // batch_size
+            if validation_steps * batch_size < len(X_val):
+                validation_steps += 1
 
-        for step in range(self.validation_steps):
+        for step in range(validation_steps):
             # Figure out data to train on
             if batch_size is None:
-                batch_X = self.X_val
-                batch_y = self.y_val
+                batch_X = X_val
+                batch_y = y_val
             else:
-                batch_X = self.X_val[step * batch_size:(step + 1) * batch_size]
-                batch_y = self.y_val[step * batch_size:(step + 1) * batch_size]
+                batch_X = X_val[step * batch_size:(step + 1) * batch_size]
+                batch_y = y_val[step * batch_size:(step + 1) * batch_size]
 
             output = self.forward(batch_X)
             loss = self.loss.calculate(output, batch_y)
