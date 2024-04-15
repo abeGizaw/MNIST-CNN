@@ -142,8 +142,6 @@ class LossCategoricalCrossEntropy(Loss):
         # One-hot
         elif len(y_true.shape) == 2:
             correct_conf = np.sum(y_pred_clipped * y_true, axis=1)
-            print(f'conf: {correct_conf}')
-            print(f'true: {y_true}')
 
         else:
             raise ValueError("Wrong dimensions for y_true")

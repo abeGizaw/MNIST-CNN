@@ -1,9 +1,6 @@
 from FeedForward import (LossCategoricalCrossEntropy, ActivationSoftmax,
                          ActivationSoftmax_Loss_CategoricalCrossEntropy, InputLayer)
 
-
-
-
 class Model:
     def __init__(self):
         self.layers = []
@@ -89,9 +86,6 @@ class Model:
                     batch_X = X[step*batch_size:(step+1)*batch_size]
                     batch_y = y[step*batch_size:(step+1)*batch_size]
 
-                # print(batch_X)
-                # print(batch_y)
-
                 # Perform the forward pass
                 output = self.forward(batch_X)
 
@@ -109,7 +103,7 @@ class Model:
                     self.optimizer.update_params(layer)
 
 
-                if batch_size is not None and step % print_every == 0:
+                if batch_size is not None and step % print_every == 0 and step != 0:
                     print(f'step:{step}, acc:{accuracy:.3f}, loss:{loss:.3f}')
 
             epoch_data_loss = self.loss.calculate_accumulated()
