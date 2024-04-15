@@ -2,6 +2,7 @@ from LoadData import load_mnist_images, load_mnist_labels, formatData
 from FeedForward import (DenseLayer, ActivationReLU, LossCategoricalCrossEntropy,
                             ActivationSoftmax, OptimizerSGD,AccuracyCategorical)
 from Model import Model
+from Convolution import ConvolutionLayer, AveragePooling, Flatten
 
 # Load and format the data
 train_images = load_mnist_images('MNISTdata\\train-images-idx3-ubyte')
@@ -15,8 +16,18 @@ print(f'y_test shape: {test_labels.shape}')
 X_train, X_test, train_labels, test_labels = formatData(train_images, test_images, train_labels, test_labels)
 
 
-# Creating layers and their activation functions
+# Creating LetNet Model
 model = Model()
+
+# Convolution step (Feature Extraction)
+model.add(ConvolutionLayer())
+model.add(ActivationReLU())
+model.add(AveragePooling())
+
+# Prepare to pass into feedforward
+model.add(Flatten())
+
+# Feedforward (Classification)
 model.add(DenseLayer(784, 64))
 model.add(ActivationReLU())
 model.add(DenseLayer(64, 10))
@@ -24,6 +35,8 @@ model.add(ActivationSoftmax())
 model.set(loss = LossCategoricalCrossEntropy(),
           optimizer = OptimizerSGD(learning_rate = 0.5),
           accuracy = AccuracyCategorical())
+
+# Finishing touches
 model.finalize()
-model.train(X_train, train_labels, epochs=100,print_every=1000, batch_size = 128)
+model.train(X_train, train_labels, epochs=1,print_every=1000, batch_size = 128)
 model.validate(validation_data = (X_test, test_labels))

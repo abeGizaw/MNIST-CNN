@@ -21,16 +21,21 @@ class DenseLayer:
         self.dweights = None
 
     def forward(self, inputs):
+        #print(f'dense in: {inputs.shape} with weights: {self.weights.shape}')
         self.inputs = inputs
         self.output = np.dot(inputs, self.weights) + self.biases
+        #print(f'dense out: {self.output.shape}')
 
     def backward(self, dvalues):
+        #print(f'dense dvals: {dvalues.shape} with inputs T: {self.inputs.T.shape} and weights {self.weights.T.shape}')
         # Gradient on parameters
         self.dweights = np.dot(self.inputs.T, dvalues)
         self.dbiases = np.sum(dvalues, axis=0, keepdims=True)
 
         # Gradient on values
         self.dinputs = np.dot(dvalues, self.weights.T)
+        #print(f'dense dinputs: {self.dinputs.shape}')
+
 
 
 class ActivationReLU:
@@ -41,12 +46,16 @@ class ActivationReLU:
         self.dinputs = None
 
     def forward(self, inputs):
+        #print(f'act in: {inputs.shape}')
         self.output = np.maximum(0, inputs)
         self.inputs = inputs
+        #print(f'act out: {self.output.shape}')
 
     def backward(self, dvalues):
+        #print(f'act dvals: {dvalues.shape} ')
         self.dinputs = dvalues.copy()
         self.dinputs[self.inputs <= 0] = 0
+        #print(f'act dinputs: {self.dinputs.shape}')
 
     @staticmethod
     def predictions(outputs):
@@ -66,15 +75,18 @@ class ActivationSoftmax:
         self.output = None
 
     def forward(self, inputs):
+        #print(f'soft in: {inputs.shape}')
         # un-normalized probabilities
         exp_values = np.exp(inputs - np.max(inputs, axis=1, keepdims=True))
 
         # Normalize for each sample
         probabilities = exp_values / np.sum(exp_values, axis=1, keepdims=True)
         self.output = probabilities
+        #print(f'soft out: {self.output.shape}')
 
     def backward(self, dvalues):
         # Create uninitialized array. Note dvalues is 2D
+        #print(f'soft dvals: {dvalues.shape}')
         self.dinputs = np.empty_like(dvalues)
 
         # Enumerate outputs and gradients
@@ -88,6 +100,7 @@ class ActivationSoftmax:
             # Calculate sample-wise gradient and add it to the array of sample gradients.
             # single_dvalues is a vector
             self.dinputs[index] = np.dot(jacobian_matrix, single_dvalues)
+        #print(f'soft dinputs: {self.dinputs.shape}')
 
     @staticmethod
     def predictions(outputs):
@@ -167,6 +180,7 @@ class LossCategoricalCrossEntropy(Loss):
         self.dinputs = self.dinputs / samples
 
 
+
 # Combined softmax and cross entropy for faster backward step
 class ActivationSoftmax_Loss_CategoricalCrossEntropy:
     def __init__(self):
@@ -175,6 +189,7 @@ class ActivationSoftmax_Loss_CategoricalCrossEntropy:
     def backward(self, dvalues, y_true):
         # Number of samples
         samples = len(dvalues)
+        #print(f'dval soft: {dvalues.shape}')
 
         # If labels are one-hot encoded, turn them into discrete values
         if len(y_true.shape) == 2:
@@ -188,6 +203,7 @@ class ActivationSoftmax_Loss_CategoricalCrossEntropy:
 
         # Normalize
         self.dinputs /= samples
+        #print(f'din soft: {self.dinputs.shape}')
 
 
 class OptimizerSGD:
@@ -234,10 +250,6 @@ class AccuracyCategorical(Accuracy):
     def __init__(self, *, binary=False):
         super().__init__()
         self.binary = binary
-
-    # Does not do anything
-    def init(self, y):
-        pass
 
     # Return a list of true and false values (1s and 0s)
     def compare(self, predictions, y):

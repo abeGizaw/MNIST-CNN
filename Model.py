@@ -59,9 +59,8 @@ class Model:
             self.softmax_classifier_output = \
                 ActivationSoftmax_Loss_CategoricalCrossEntropy()
 
+    # Size of x is # inputs x flattened input
     def train(self, X, y, *, epochs=1, batch_size = None, print_every=100):
-        # Initialize accuracy object
-        self.accuracy.init(y)
 
         # Calculate number of steps
         train_steps = 1
