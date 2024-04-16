@@ -29,11 +29,9 @@ def formatData(train_images, test_images, train_labels, test_labels):
     train_labels.reshape(-1, 1)
     test_labels.reshape(-1, 1)
 
-    print(X_train.shape)
-
-    # # Flatten data before passing into network
-    # X_train = X_train.reshape((-1, 784))  # Flatten the images to 1D array of 784 features
-    # X_test = X_test.reshape((-1, 784))  # Image is 28X28
+    # Adds a channel dimension
+    X_train = X_train.reshape(-1, 28, 28, 1)
+    X_test = X_test.reshape(-1, 28, 28, 1)
 
 
     return X_train, X_test, train_labels, test_labels

@@ -20,9 +20,12 @@ X_train, X_test, train_labels, test_labels = formatData(train_images, test_image
 model = Model()
 
 # Convolution step (Feature Extraction)
-model.add(ConvolutionLayer())
+model.add(ConvolutionLayer(depth=6, kernel_size=(5, 5), padding=2, input_size = (28, 28, 1)))
 model.add(ActivationReLU())
 model.add(AveragePooling())
+# model.add(ConvolutionLayer(depth=16, kernel_size=(10, 10), input_size = (28, 28, 1)))
+# model.add(ActivationReLU())
+# model.add(AveragePooling())
 
 # Prepare to pass into feedforward
 model.add(Flatten())
