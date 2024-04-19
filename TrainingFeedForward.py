@@ -39,7 +39,7 @@ model.finalize()
 
 # Time model.train()
 start_train = time.time()
-model.train(X_train, train_labels, epochs=3, print_every=128, batch_size=128)
+model.train(X_train, train_labels, epochs=100, print_every=384, batch_size=128)
 end_train = time.time()
 
 start_validate = time.time()

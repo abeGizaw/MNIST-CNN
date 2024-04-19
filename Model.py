@@ -171,7 +171,7 @@ class Model:
                 print(
                     f'validation, step:{step}, acc:{accuracy:.3f}, loss:{loss:.3f}'
                 )
-                print(f'step took {valid_time_e - valid_time_s:.2f} seconds')
+                print(f'step took {valid_time_e - valid_time_s:.2f} seconds\n')
 
         validation_loss = self.loss.calculate_accumulated()
         validation_accuracy = self.accuracy.calculate_accumulated()

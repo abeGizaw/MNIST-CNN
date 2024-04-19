@@ -19,10 +19,12 @@ X_train, X_test, train_labels, test_labels = formatData(train_images, test_image
 # Creating LetNet Model
 model = Model()
 
-# Convolution + Pooling step (Feature Extraction)
+# Convolution + Pooling step (Feature Extraction) Note this will take an hour +.
 model.add(ConvolutionLayer(depth=6, kernel_size=(5, 5), padding='same', input_size = (28, 28, 1)))
 model.add(ActivationReLU())
 model.add(AveragePooling())
+
+# Can comment out next 3 lines to run code a little faster. Change inputs of dense layer from 400 -> 1176
 model.add(ConvolutionLayer(depth=16, kernel_size=(5, 5), input_size = (14, 14, 6)))
 model.add(ActivationReLU())
 model.add(AveragePooling())
@@ -48,7 +50,7 @@ model.finalize()
 
 # Time model.train()
 start_train = time.time()
-model.train(X_train, train_labels, epochs=2, print_every=64, batch_size=128)
+model.train(X_train, train_labels, epochs=3, print_every=64, batch_size=128)
 end_train = time.time()
 
 start_validate = time.time()
