@@ -170,6 +170,7 @@ class Model:
 
             # Call backward on every layer but the last in reversed order
             for layer in reversed(self.layers[:-1]):
+                #print(f'{layer} -> {layer.next}')
                 layer.backward(layer.next.dinputs)
         # Is not a softmax classifier
         else:
@@ -181,3 +182,4 @@ class Model:
             for layer in reversed(self.layers):
                 layer.backward(layer.next.dinputs)
 
+ 

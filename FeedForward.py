@@ -52,7 +52,7 @@ class ActivationReLU:
         #print(f'act out: {self.output.shape}')
 
     def backward(self, dvalues):
-        #print(f'act dvals: {dvalues.shape} ')
+        #print(f'act dvals: {dvalues.shape} and inputs: {self.inputs.shape} ')
         self.dinputs = dvalues.copy()
         self.dinputs[self.inputs <= 0] = 0
         #print(f'act dinputs: {self.dinputs.shape}')

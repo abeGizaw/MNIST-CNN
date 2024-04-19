@@ -22,24 +22,29 @@ model = Model()
 # Convolution step (Feature Extraction)
 model.add(ConvolutionLayer(depth=6, kernel_size=(5, 5), padding='same', input_size = (28, 28, 1)))
 model.add(ActivationReLU())
-model.add(AveragePooling(stride = 2))
-# model.add(ConvolutionLayer(depth=6, kernel_size=(5, 5), input_size = (14, 14, 6)))
-# model.add(ActivationReLU())
-# model.add(AveragePooling(stride = 2))
+#model.add(AveragePooling())
+#model.add(ConvolutionLayer(depth=16, kernel_size=(5, 5), input_size = (14, 14, 6)))
+#model.add(ActivationReLU())
+#model.add(AveragePooling())
 
 # Prepare to pass into feedforward
 model.add(Flatten())
 
 # Feedforward (Classification)
-model.add(DenseLayer(784, 64))
+#model.add(DenseLayer(400, 120))
+model.add(DenseLayer(4704, 120))
 model.add(ActivationReLU())
-model.add(DenseLayer(64, 10))
+model.add(DenseLayer(120, 84))
+model.add(ActivationReLU())
+model.add(DenseLayer(84, 10))
 model.add(ActivationSoftmax())
+
+
 model.set(loss = LossCategoricalCrossEntropy(),
           optimizer = OptimizerSGD(learning_rate = 0.5),
           accuracy = AccuracyCategorical())
 
 # Finishing touches
 model.finalize()
-model.train(X_train, train_labels, epochs=1,print_every=1000, batch_size = 128)
+model.train(X_train, train_labels, epochs=1,print_every=1000, batch_size =128)
 model.validate(validation_data = (X_test, test_labels))
