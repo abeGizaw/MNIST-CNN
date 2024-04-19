@@ -1,6 +1,6 @@
+import time
 from FeedForward import (LossCategoricalCrossEntropy, ActivationSoftmax,
                          ActivationSoftmax_Loss_CategoricalCrossEntropy, InputLayer)
-
 class Model:
     def __init__(self):
         self.layers = []
@@ -24,8 +24,13 @@ class Model:
         self.accuracy = accuracy
 
 
-    # Finalizes the model, setting the next and previous layers
+
     def finalize(self):
+        """
+        Connects all the layers, setting their next and previous
+        Keeps track of all trainable layers
+        :return:
+        """
         self.input_layer = InputLayer()
         layer_count = len(self.layers)
 
@@ -61,7 +66,16 @@ class Model:
 
     # Size of x is # inputs x flattened input
     def train(self, X, y, *, epochs=1, batch_size = None, print_every=100):
+        """
 
+        :param X: train data inputs (# of inputs x flattened input)
+        :param y: the trained data expected
+        :param epochs: iterations
+        :param batch_size
+        :param print_every
+        :return:
+        """
+        print(f'starting to train\n')
         # Calculate number of steps
         train_steps = 1
         if batch_size is not None:
@@ -71,8 +85,10 @@ class Model:
             # Add a step for leftover data
             if train_steps * batch_size < len(X):
                 train_steps += 1
+            print(f'running {len(X)} pieces of data in {train_steps} steps\n')
 
         for epoch in range(1, epochs + 1):
+            epoch_time_s = time.time()
             self.loss.new_pass()
             self.accuracy.new_pass()
 
@@ -85,6 +101,7 @@ class Model:
                     batch_X = X[step*batch_size:(step+1)*batch_size]
                     batch_y = y[step*batch_size:(step+1)*batch_size]
 
+                train_time_s = time.time()
                 # Perform the forward pass
                 output = self.forward(batch_X)
 
@@ -101,17 +118,29 @@ class Model:
                 for layer in self.trainable_layers:
                     self.optimizer.update_params(layer)
 
+                train_time_e = time.time()
 
                 if batch_size is not None and step % print_every == 0 and step != 0:
                     print(f'step:{step}, acc:{accuracy:.3f}, loss:{loss:.3f}')
+                    print(f'step took {train_time_e - train_time_s:.2f} seconds')
 
             epoch_data_loss = self.loss.calculate_accumulated()
             epoch_accuracy = self.accuracy.calculate_accumulated()
-            if epoch % print_every == 0:
-                print(f'epoch:{epoch}, acc:{epoch_accuracy:.3f}, loss:{epoch_data_loss:.3f}\n')
+
+            epoch_time_e = time.time()
+            print(f'epoch:{epoch}, acc:{epoch_accuracy:.3f}, loss:{epoch_data_loss:.3f}')
+            print(f'epoch took {epoch_time_e - epoch_time_s:.2f} seconds\n')
 
 
-    def validate(self, *, validation_data, batch_size = None):
+    def validate(self, *, validation_data, batch_size = None, print_every = 100):
+        """
+        :param print_every:
+        :param validation_data: inputs and expected out values
+        :param batch_size
+        :return:
+        """
+        print(f'starting to validate\n')
+
         self.loss.new_pass()
         self.accuracy.new_pass()
         X_val, y_val = validation_data
@@ -131,15 +160,18 @@ class Model:
                 batch_X = X_val[step * batch_size:(step + 1) * batch_size]
                 batch_y = y_val[step * batch_size:(step + 1) * batch_size]
 
+            valid_time_s = time.time()
             output = self.forward(batch_X)
             loss = self.loss.calculate(output, batch_y)
             predictions = self.output_layer_activation.predictions(output)
             accuracy = self.accuracy.calculate(predictions, batch_y)
+            valid_time_e = time.time()
 
-            if batch_size is not None and step % (batch_size // 8) == 0:
+            if batch_size is not None and step % print_every == 0 and step != 0:
                 print(
                     f'validation, step:{step}, acc:{accuracy:.3f}, loss:{loss:.3f}'
                 )
+                print(f'step took {valid_time_e - valid_time_s:.2f} seconds')
 
         validation_loss = self.loss.calculate_accumulated()
         validation_accuracy = self.accuracy.calculate_accumulated()
@@ -147,11 +179,15 @@ class Model:
 
 
     def forward(self, X):
+        """
+        :param X: input to pass forward
+        Call forward on every hidden layer
+        Output of prev layer is input of the next
+        :return:
+        """
         # Pass in the input to the input layer
         self.input_layer.forward(X)
 
-        # Call forward on every hidden layer
-        # Output of prev layer is input of the next
         for layer in self.layers:
             layer.forward(layer.prev.output)
 
@@ -170,8 +206,8 @@ class Model:
 
             # Call backward on every layer but the last in reversed order
             for layer in reversed(self.layers[:-1]):
-                #print(f'{layer} -> {layer.next}')
                 layer.backward(layer.next.dinputs)
+
         # Is not a softmax classifier
         else:
             # This will set our initial dinputs

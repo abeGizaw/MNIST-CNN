@@ -3,11 +3,14 @@ from scipy import signal
 class ConvolutionLayer:
     # Note this Convolution layer does not account for varying strides
     def __init__(self, *, depth, kernel_size, padding='valid', input_size):
-        # input size -> [height, width, depth]
-        self.firstTime = True
-        self.moutput = None
+        """
+        :param depth: amount of filters
+        :param kernel_size: filter size
+        :param padding: padding mode
+        :param input_size: (height, width, depth)
+        """
         self.input_height, self.input_width, self.input_depth = input_size
-        self.depth = depth # Number of filters
+        self.depth = depth
 
         self.kernel_height, self.kernel_width = kernel_size
         self.kernel_shape = (self.kernel_height, self.kernel_width, self.input_depth, self.depth)
@@ -36,22 +39,22 @@ class ConvolutionLayer:
         # Weights and biases (filters and biases). Using tied bias
         self.weights = self.glorot_init(self.kernel_shape)
         self.biases = np.zeros(self.depth)
-
-        print(f'kernel shape: {self.kernel_shape}')
-        print(f'bias shape: {self.biases.shape, self.biases}')
-        print(f'weights shape: {self.weights.shape}')
+        self.dbiases = np.zeros(self.depth)
+        self.dweights = np.zeros(self.kernel_shape)
 
         self.inputs = None
         self.output = None
         self.dinputs = None
-        self.dbiases = None
-        self.dweights = None
 
 
     # Xavier/Glorot initialization for layers using sigmoid or tanh
     @staticmethod
     def glorot_init(shape):
-        # shape: (kernel_height, kernel_width, input_depth, number_of_filters)
+        """
+        :param shape: kernel shape -> (kernel_height, kernel_width, input_depth, number_of_filters)
+        :return: fill the matrix using glorot
+        """
+
         fan_in = shape[0] * shape[1] * shape[2]  # product of kernel dimensions and input depth
         fan_out = shape[0] * shape[1] * shape[3]  # product of kernel dimensions and number of filters
 
@@ -59,6 +62,10 @@ class ConvolutionLayer:
         return np.random.uniform(-limit, limit, size=shape)
 
     def forward(self, inputs):
+        """
+        :param inputs: image input. Dimensions -> {batch_size, image height, image width, image depth}
+        :return: set the output
+        """
         self.inputs = inputs
         batch_size = inputs.shape[0]
         output_shape = (batch_size, self.output_height, self.output_width, self.depth)
@@ -80,19 +87,13 @@ class ConvolutionLayer:
                 # Add the bias for each filter
                 self.output[image, :, :, filt] += self.biases[filt]
 
-        # if self.firstTime:
-        #     print()
-        #     print(f'indexes for image: {image, filt}')
-        #     print(f'indexes for filter: {dep, filt}')
-        #     print(f'input shape: {inputs.shape} -> {inputs[image, :, :, dep].shape}')
-        #     print(f'choosing filter: {self.w[:, :, dep, filt].shape}')
-        #     print(f'output shape: {output_shape}')
-        #     self.firstTime = False
 
 
     def backward(self, dvalues):
-        self.dweights = np.zeros(self.kernel_shape)
-        self.dbiases = np.zeros(self.depth)
+        """
+        :param dvalues: image derivative input. Dimensions -> {batch_size, image height, image width, image depth}
+        :return: set the dweights, dinputs, and dbiases
+        """
         self.dinputs = np.zeros(self.inputs.shape)
 
         batch_size = dvalues.shape[0]
@@ -105,6 +106,7 @@ class ConvolutionLayer:
                 for dep in range(self.input_depth):
                     # Cross-correlation
 
+                    # Change of weights is a cross correlation of input image and corresponding dval
                     self.dweights[:, :, dep, filt] += signal.correlate2d(
                         self.inputs[image, :, :, dep],
                         dvalues[image, :, :, dep],
@@ -113,6 +115,7 @@ class ConvolutionLayer:
 
                     rotated_weights = np.rot90(self.weights[:, :, dep, filt], 2)
 
+                    # Change of inputs is a convolution of dval and the kernel (which has been rotated 180 degrees)
                     self.dinputs[image, :, :, dep] += signal.convolve2d(
                         dvalues[image, :, :, dep],
                         rotated_weights,
@@ -121,7 +124,7 @@ class ConvolutionLayer:
 
                 self.dbiases[filt] += np.sum(dvalues[image, :, :, filt])
 
-
+        # Batch Normalization
         self.dweights /= batch_size
         self.dbiases /= batch_size
 
@@ -129,14 +132,18 @@ class ConvolutionLayer:
 
 class AveragePooling:
     def __init__(self, *, window_size=2, stride = 2):
-        self.moutput = None
+        self.input = None
         self.output = None
         self.dinputs = None
         self.window_size = window_size
         self.stride = stride
 
     def forward(self, inputs):
-        print(f"PooL Input size: {inputs.shape}")
+        """
+        :param inputs: image input. Dimensions -> {batch_size, image height, image width, image depth}
+        :return: reduce the size with average pooling
+        """
+        self.input = inputs
 
         batch_size, height, width, channels = inputs.shape
 
@@ -148,18 +155,35 @@ class AveragePooling:
         self.output = np.zeros((batch_size, output_height, output_width, channels))
 
         # Apply the pooling operation
-        for i in range(0, height - self.window_size + 1, self.stride):
-            for j in range(0, width - self.window_size + 1, self.stride):
-                # Pulls a window out of our input
-                window = inputs[:, i:i + self.window_size, j:j + self.window_size, :]
+        for k in range(batch_size):  # Loop over each item in the batch
+            for i in range(0, height - self.window_size + 1, self.stride):
+                for j in range(0, width - self.window_size + 1, self.stride):
+                    # Pulls a window out of our input
+                    window = inputs[:, i:i + self.window_size, j:j + self.window_size, :]
 
-                # Average over the height and width of the window and place in output
-                self.output[:, i // self.stride, j // self.stride, :] = np.mean(window, axis=(1, 2))
+                    # Average over the height and width of the window and place in output
+                    self.output[:, i // self.stride, j // self.stride, :] = np.mean(window, axis=(1, 2))
 
-        print(f'pool output size: {self.output.shape}')
-        self.output = inputs
+
     def backward(self, dvalues):
-        self.dinputs = dvalues
+        self.dinputs = np.zeros(self.input.shape)
+        batch_size, input_height, input_width, input_depth = self.input.shape
+
+        # Loop over the batch size and depth dimensions
+        for i in range(batch_size):
+            for d in range(input_depth):
+                # Loop over the spatial dimensions of the dvalues
+                for j in range(dvalues.shape[1]):  # Assuming dvalues.shape[1] == dvalues.shape[2]
+                    for k in range(dvalues.shape[2]):
+
+                        start_j = j * self.stride
+                        end_j = start_j + self.window_size
+                        start_k = k * self.stride
+                        end_k = start_k + self.window_size
+
+                        # Spread the gradient from dvalues to the dinputs
+                        gradient = dvalues[i, j, k, d] / (self.window_size ** 2)
+                        self.dinputs[i, start_j:end_j, start_k:end_k, d] += gradient
 
 
 class Flatten:
@@ -169,11 +193,12 @@ class Flatten:
         self.input_shape = None
 
     def forward(self, inputs):
-        # print(f'flatten in: {inputs.shape}')
+        """
+        :param inputs: image with size -> (batchSize, height, width, depth)
+        :return: a flattened output, keeping the batch-size untouched
+        """
         self.input_shape = inputs.shape
         self.output = inputs.reshape((inputs.shape[0], -1))
-        # print(f'flatten out: {self.output.shape}')
-
 
     def backward(self, dvalues):
         self.dinputs = dvalues.reshape(self.input_shape)
