@@ -9,7 +9,7 @@ class StatisticsTracker:
         self.epoch_accuracies = {}  # This will hold the accuracies for each epoch
         self.validation_accuracies = []  # This will hold the validation accuracies
         self.timesRan = 0
-        self.stats_file = stats_file
+        self.stats_file = os.path.join('data', stats_file)
         os.makedirs('data', exist_ok=True)
         self.load_statistics()
 
@@ -30,6 +30,7 @@ class StatisticsTracker:
             'epoch_accuracies': {},
             'validation_accuracies': self.validation_accuracies
         }
+        print(f'data we will add is{data}')
 
         if os.path.exists(self.stats_file):
             with open(self.stats_file, 'r') as file:
@@ -51,7 +52,7 @@ class StatisticsTracker:
         data['epoch_accuracies'] = existing_epoch_accuracies
 
 
-        with open(os.path.join('data', self.stats_file), 'w') as file:
+        with open(self.stats_file, 'w') as file:
             json.dump(data, file, indent=4)
 
     def add_time(self, phase,elapsed_time):

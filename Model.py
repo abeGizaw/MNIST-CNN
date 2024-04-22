@@ -120,8 +120,8 @@ class Model:
                     self.optimizer.update_params(layer)
 
                 total_train_time = time.time() - train_time_s
-                self.statTracker.add_time("step", total_train_time)
                 if batch_size is not None and step % print_every == 0 and step != 0:
+                    self.statTracker.add_time("step", total_train_time)
                     print(f'step:{step}, acc:{accuracy:.3f}, loss:{loss:.3f}')
                     print(f'step took {total_train_time:.2f} seconds')
 
