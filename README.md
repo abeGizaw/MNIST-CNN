@@ -46,4 +46,12 @@ Result:
    - Model Code. Allows the user to build their Neural Network using a very similar approach to Keras.
 
 3. FeedForward.py
-   - Code for the FeedForward Network. Lots of inspiration from author/YouT
+   - Code for the FeedForward Network. Lots of inspiration from author/Youtuber Harrison Linsley (Sentdex) and his book [Neural Networks from Scratch in Python](https://nnfs.io/).
+  
+4. Convolution.py
+   - Code for the Convolution Process. Contains the pooling and flattening layers.
+
+5. StatisticsTracker.py
+   - This file keeps track of the average run time of the model’s steps, epochs, training, validation, and total runtime
+   - It also keeps track of the average accuracy of each model
+   - Saves everything to a JSON file, and writes averages to a Txt file
