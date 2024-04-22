@@ -3,7 +3,8 @@ from LoadData import load_mnist_images, load_mnist_labels, formatData
 from FeedForward import (DenseLayer, ActivationReLU, LossCategoricalCrossEntropy,
                             ActivationSoftmax, OptimizerSGD,AccuracyCategorical)
 from Model import Model
-from Convolution import ConvolutionLayer, AveragePooling, Flatten
+from StatisticsTracker import StatisticsTracker
+
 # Load and format the data
 train_images = load_mnist_images('MNISTdata\\train-images-idx3-ubyte')
 train_labels = load_mnist_labels('MNISTdata\\train-labels-idx1-ubyte')
@@ -13,13 +14,12 @@ print(f'X_train shape: {train_images.shape}')
 print(f'y_train shape: {train_labels.shape}')
 print(f'X_test shape: {test_images.shape}')
 print(f'y_test shape: {test_labels.shape}\n')
-X_train, X_test, train_labels, test_labels = formatData(train_images, test_images, train_labels, test_labels)
+X_train, X_test, train_labels, test_labels = formatData(train_images, test_images, train_labels, test_labels, flatten=True)
 
-X_train = X_train.reshape((X_train.shape[0], -1))
-X_test = X_test.reshape((X_test.shape[0], -1))
 
 # Creating LetNet Model
-model = Model()
+stats = StatisticsTracker("FeedForward", "feedforward_stats.json")
+model = Model(stats)
 
 # Feedforward (Classification)
 model.add(DenseLayer(784, 120))
@@ -39,7 +39,7 @@ model.finalize()
 
 # Time model.train()
 start_train = time.time()
-model.train(X_train, train_labels, epochs=100, print_every=384, batch_size=128)
+model.train(X_train, train_labels, epochs=3, print_every=64, batch_size=128)
 end_train = time.time()
 
 start_validate = time.time()
@@ -51,3 +51,8 @@ validate_time = end_validate - start_validate
 print(f'train time: {train_time:.2f} seconds')
 print(f'finalize time: {validate_time:.2f} seconds')
 print(f'combined time: {train_time + validate_time:.2f} seconds')
+
+stats.add_time('validation', validate_time)
+stats.add_time('training', train_time)
+stats.add_time('combined', train_time + validate_time)
+stats.save_statistics()

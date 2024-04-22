@@ -2,10 +2,11 @@ import time
 from FeedForward import (LossCategoricalCrossEntropy, ActivationSoftmax,
                          ActivationSoftmax_Loss_CategoricalCrossEntropy, InputLayer)
 class Model:
-    def __init__(self):
+    def __init__(self, statTracker):
         self.layers = []
         self.input_layer = None
         self.trainable_layers = []
+        self.statTracker = statTracker
 
         # Layers we want to save off
         self.accuracy = None
@@ -118,18 +119,21 @@ class Model:
                 for layer in self.trainable_layers:
                     self.optimizer.update_params(layer)
 
-                train_time_e = time.time()
-
+                total_train_time = time.time() - train_time_s
+                self.statTracker.add_time("step", total_train_time)
                 if batch_size is not None and step % print_every == 0 and step != 0:
                     print(f'step:{step}, acc:{accuracy:.3f}, loss:{loss:.3f}')
-                    print(f'step took {train_time_e - train_time_s:.2f} seconds')
+                    print(f'step took {total_train_time:.2f} seconds')
+
 
             epoch_data_loss = self.loss.calculate_accumulated()
             epoch_accuracy = self.accuracy.calculate_accumulated()
 
-            epoch_time_e = time.time()
+            total_epoch_time = time.time()- epoch_time_s
+            self.statTracker.add_time("epoch", total_epoch_time)
+            self.statTracker.record_epoch_accuracy(epoch, epoch_accuracy)
             print(f'epoch:{epoch}, acc:{epoch_accuracy:.3f}, loss:{epoch_data_loss:.3f}')
-            print(f'epoch took {epoch_time_e - epoch_time_s:.2f} seconds\n')
+            print(f'epoch took {total_epoch_time:.2f} seconds\n')
 
 
     def validate(self, *, validation_data, batch_size = None, print_every = 100):
@@ -175,6 +179,7 @@ class Model:
 
         validation_loss = self.loss.calculate_accumulated()
         validation_accuracy = self.accuracy.calculate_accumulated()
+        self.statTracker.record_validation_accuracy(validation_accuracy)
         print(f'final validation - acc:{validation_accuracy}, loss:{validation_loss}')
 
 

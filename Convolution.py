@@ -156,13 +156,18 @@ class AveragePooling:
 
         # Apply the pooling operation
         for k in range(batch_size):  # Loop over each item in the batch
-            for i in range(0, height - self.window_size + 1, self.stride):
-                for j in range(0, width - self.window_size + 1, self.stride):
-                    # Pulls a window out of our input
-                    window = inputs[:, i:i + self.window_size, j:j + self.window_size, :]
+            for i in range(output_height):
+                for j in range(output_width):
+                    for c in range(channels):
+                        # Define the current window
+                        h_start = i * self.stride
+                        h_end = h_start + self.window_size
+                        w_start = j * self.stride
+                        w_end = w_start + self.window_size
+                        window = inputs[k, h_start:h_end, w_start:w_end, c]
 
-                    # Average over the height and width of the window and place in output
-                    self.output[:, i // self.stride, j // self.stride, :] = np.mean(window, axis=(1, 2))
+                        # Calculate the average value for the current window
+                        self.output[k ,i, j, c] = np.mean(window)
 
 
     def backward(self, dvalues):
@@ -173,7 +178,7 @@ class AveragePooling:
         for i in range(batch_size):
             for d in range(input_depth):
                 # Loop over the spatial dimensions of the dvalues
-                for j in range(dvalues.shape[1]):  # Assuming dvalues.shape[1] == dvalues.shape[2]
+                for j in range(dvalues.shape[1]):
                     for k in range(dvalues.shape[2]):
 
                         start_j = j * self.stride

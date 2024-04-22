@@ -4,6 +4,7 @@ from FeedForward import (DenseLayer, ActivationReLU, LossCategoricalCrossEntropy
                             ActivationSoftmax, OptimizerSGD,AccuracyCategorical)
 from Model import Model
 from Convolution import ConvolutionLayer, AveragePooling, Flatten
+from StatisticsTracker import StatisticsTracker
 # Load and format the data
 train_images = load_mnist_images('MNISTdata\\train-images-idx3-ubyte')
 train_labels = load_mnist_labels('MNISTdata\\train-labels-idx1-ubyte')
@@ -17,7 +18,8 @@ X_train, X_test, train_labels, test_labels = formatData(train_images, test_image
 
 
 # Creating LetNet Model
-model = Model()
+stats = StatisticsTracker("FullNetwork", 'full_network_stats.json')
+model = Model(stats)
 
 # Convolution + Pooling step (Feature Extraction) Note this will take an hour +.
 model.add(ConvolutionLayer(depth=6, kernel_size=(5, 5), padding='same', input_size = (28, 28, 1)))
@@ -62,3 +64,8 @@ validate_time = end_validate - start_validate
 print(f'train time: {train_time:.2f} seconds')
 print(f'finalize time: {validate_time:.2f} seconds')
 print(f'combined time: {train_time + validate_time:.2f} seconds')
+
+stats.add_time('validation', validate_time)
+stats.add_time('training', train_time)
+stats.add_time('combined', train_time + validate_time)
+stats.save_statistics()
