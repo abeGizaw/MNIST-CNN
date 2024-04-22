@@ -55,3 +55,16 @@ Result:
    - This file keeps track of the average run time of the model’s steps, epochs, training, validation, and total runtime
    - It also keeps track of the average accuracy of each model
    - Saves everything to a JSON file, and writes averages to a Txt file
+  
+
+## Data and Results
+
+This table documents how fast the each model ran and how accurate it was when finished. Note that the model had a lot of run-time variation per step and epoch. Validation is much quicker than training because you only do 1 iteration with no backpropagation. Run time will vary by computer (obv.).
+
+| Networks                | Params                            | Run time                                                        | Accuracy                                                             |
+|-------------------------|-----------------------------------|-----------------------------------------------------------------|----------------------------------------------------------------------|
+| **FeedForward**         | Lr = 0.5 <br> Epochs = 3 <br> Batch size = 128 | Step: 0.00 s <br> Training: 0.6 - 0.8 s <br> Validation: 0.03 s <br> Total: 2.13 s | Times Ran: 6 <br> Epoch: 87% -> 96% -> 97% <br> Total: 95%          |
+| **Convolution (Single Conv)** | Lr = 0.5 <br> Epochs = 3 <br> Batch size = 128 | Step: 0.08 s <br> Training: 1.9 min <br> Validation: 2.45 s <br> Total: 1.9 min | Times Ran: 5 <br> Epoch: 88% -> 96% -> 97% <br> Total: 96%          |
+| **Convolution (Double Conv)** | Lr = 0.5 <br> Epochs = 3 <br> Batch size = 128 | Step: 1.2 - 2 s <br> Training: 35 min <br> Validation: 28 s <br> Total: 35.4 min | Times Ran: 1 <br> Epoch: 55% -> 85% -> 90% <br> Total: 84%          |
+| **Convolution + Avg. Pooling (Single)** | Lr = 0.5 <br> Epochs = 3 <br> Batch size = 128 | Step: 1 - 3.5 s <br> Training: 30 min <br> Validation: 42.3 s <br> Total: 31 min | Times Ran: 1 <br> Epoch: 87% -> 95% -> 97% <br> Total: 97%          |
+| **Convolution + Avg. Pooling (Double)** | Lr = 0.5 <br> Epochs = 3 <br> Batch size = 128 | Step: 1 - 15 min <br> Training: 22 min <br> Validation: 1.1 h <br> Total: 2.1 h | Times Ran: 1 <br> Epoch: 18% -> 77% -> 85% <br> Total: 76%          |
