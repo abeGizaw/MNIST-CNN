@@ -57,6 +57,40 @@ Result:
    - Saves everything to a JSON file, and writes averages to a Txt file
   
 
+## Baisc Code Setup  
+```  
+train_images = load_mnist_images('MNISTdata\\train-images-idx3-ubyte')
+train_labels = load_mnist_labels('MNISTdata\\train-labels-idx1-ubyte')
+test_images = load_mnist_images('MNISTdata\\t10k-images-idx3-ubyte')
+test_labels = load_mnist_labels('MNISTdata\\t10k-labels-idx1-ubyte')
+X_train, X_test, train_labels, test_labels = formatData(train_images, test_images, train_labels, test_labels)
+
+stats = StatisticsTracker("FullNetwork", 'full_network_stats.json')
+model = Model(stats)
+
+model.add(ConvolutionLayer(depth=6, kernel_size=(5, 5), padding='same', input_size = (28, 28, 1)))
+model.add(ActivationReLU())
+model.add(AveragePooling())
+model.add(ConvolutionLayer(depth=16, kernel_size=(5, 5), input_size = (14, 14, 6)))
+model.add(ActivationReLU())
+model.add(AveragePooling())
+
+model.add(Flatten())
+
+model.add(DenseLayer(400 , 120))
+model.add(ActivationReLU())
+model.add(DenseLayer(120, 84))
+model.add(ActivationReLU())
+model.add(DenseLayer(84, 10))
+model.add(ActivationSoftmax())
+
+model.set(loss = LossCategoricalCrossEntropy(),
+          optimizer = OptimizerSGD(learning_rate = 0.5),
+          accuracy = AccuracyCategorical())
+model.finalize()
+model.train(X_train, train_labels, epochs=3, print_every=64, batch_size=128)
+model.validate(validation_data = (X_test, test_labels), batch_size=128, print_every=64)  
+```  
 ## Data and Results
 
 This table documents how fast the each model ran and how accurate it was when finished. Note that the model had a lot of run-time variation per step and epoch. Validation is much quicker than training because you only do 1 iteration with no backpropagation. Run time will vary by computer (obv.).
