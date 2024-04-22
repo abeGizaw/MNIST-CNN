@@ -27,6 +27,7 @@ model.add(ActivationReLU())
 model.add(AveragePooling())
 
 # Can comment out next 3 lines to run code a little faster. Change inputs of dense layer from 400 -> 1176
+# Also make a new stats tracker
 model.add(ConvolutionLayer(depth=16, kernel_size=(5, 5), input_size = (14, 14, 6)))
 model.add(ActivationReLU())
 model.add(AveragePooling())

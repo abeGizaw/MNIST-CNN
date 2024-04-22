@@ -20,6 +20,7 @@ X_train, X_test, train_labels, test_labels = formatData(train_images, test_image
 
 # Creating LetNet Model
 stats = StatisticsTracker("Convolve","convolve_stats.json")
+# stats2 = StatisticsTracker("ConvolveDouble","convolve_double_stats.json")
 model = Model(stats)
 
 # Convolution step (Feature Extraction)
@@ -27,6 +28,7 @@ model.add(ConvolutionLayer(depth=6, kernel_size=(5, 5), padding='same', input_si
 model.add(ActivationReLU())
 
 # Optional second convolution layer (input of first dense layer goes from 4704 -> 9216)
+# Use stats 2 instead of stats 1
 # model.add(ConvolutionLayer(depth=16, kernel_size=(5, 5), input_size = (28, 28, 6)))
 # model.add(ActivationReLU())
 

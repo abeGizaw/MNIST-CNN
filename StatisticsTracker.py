@@ -30,7 +30,6 @@ class StatisticsTracker:
             'epoch_accuracies': {},
             'validation_accuracies': self.validation_accuracies
         }
-        print(f'data we will add is{data}')
 
         if os.path.exists(self.stats_file):
             with open(self.stats_file, 'r') as file:
