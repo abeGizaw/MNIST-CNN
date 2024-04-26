@@ -5,6 +5,9 @@ from FeedForward import (DenseLayer, ActivationReLU, LossCategoricalCrossEntropy
 from Model import Model
 from Convolution import ConvolutionLayer, AveragePooling, Flatten
 from StatisticsTracker import StatisticsTracker
+"""
+LeNet Model
+"""
 # Load and format the data
 train_images = load_mnist_images('MNISTdata\\train-images-idx3-ubyte')
 train_labels = load_mnist_labels('MNISTdata\\train-labels-idx1-ubyte')

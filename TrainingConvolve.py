@@ -5,7 +5,9 @@ from FeedForward import (DenseLayer, ActivationReLU, LossCategoricalCrossEntropy
 from Model import Model
 from Convolution import ConvolutionLayer, Flatten
 from StatisticsTracker import StatisticsTracker
-
+"""
+Train the model with convolution and a feedforward network
+"""
 # Load and format the data
 train_images = load_mnist_images('MNISTdata\\train-images-idx3-ubyte')
 train_labels = load_mnist_labels('MNISTdata\\train-labels-idx1-ubyte')
@@ -19,9 +21,9 @@ X_train, X_test, train_labels, test_labels = formatData(train_images, test_image
 
 
 # Creating LetNet Model
-# stats = StatisticsTracker("Convolve","convolve_stats.json")
-stats2 = StatisticsTracker("ConvolveDouble","convolve_double_stats.json")
-model = Model(stats2)
+stats = StatisticsTracker("Convolve","convolve_stats.json")
+# stats2 = StatisticsTracker("ConvolveDouble","convolve_double_stats.json")
+model = Model(stats)
 
 # Convolution step (Feature Extraction)
 model.add(ConvolutionLayer(depth=6, kernel_size=(5, 5), padding='same', input_size = (28, 28, 1)))
@@ -29,14 +31,14 @@ model.add(ActivationReLU())
 
 # Optional second convolution layer (input of first dense layer goes from 4704 -> 9216)
 # Use stats 2 instead of stats 1
-model.add(ConvolutionLayer(depth=16, kernel_size=(5, 5), input_size = (28, 28, 6)))
-model.add(ActivationReLU())
+# model.add(ConvolutionLayer(depth=16, kernel_size=(5, 5), input_size = (28, 28, 6)))
+# model.add(ActivationReLU())
 
 # Prepare to pass into feedforward
 model.add(Flatten())
 
 # Feedforward (Classification)
-model.add(DenseLayer(9216, 120))
+model.add(DenseLayer(4704, 120))
 model.add(ActivationReLU())
 model.add(DenseLayer(120, 84))
 model.add(ActivationReLU())
@@ -66,7 +68,7 @@ print(f'train time: {train_time:.2f} seconds')
 print(f'finalize time: {validate_time:.2f} seconds')
 print(f'combined time: {train_time + validate_time:.2f} seconds')
 
-stats2.add_time('validation', validate_time)
-stats2.add_time('training', train_time)
-stats2.add_time('combined', train_time + validate_time)
-stats2.save_statistics()
+stats.add_time('validation', validate_time)
+stats.add_time('training', train_time)
+stats.add_time('combined', train_time + validate_time)
+stats.save_statistics()

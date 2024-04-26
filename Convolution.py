@@ -1,5 +1,9 @@
 import numpy as np
 from scipy import signal
+
+# Below imports are for debugging
+# import nnfs
+# nnfs.init()
 class ConvolutionLayer:
     # Note this Convolution layer does not account for varying strides
     def __init__(self, *, depth, kernel_size, padding='valid', input_size):
@@ -70,6 +74,7 @@ class ConvolutionLayer:
         batch_size = inputs.shape[0]
         output_shape = (batch_size, self.output_height, self.output_width, self.depth)
         self.output = np.zeros(output_shape)
+
 
         depth_size = self.kernel_shape[-1]
         # For each image in the batch
@@ -203,6 +208,7 @@ class Flatten:
         :return: a flattened output, keeping the batch-size untouched
         """
         self.input_shape = inputs.shape
+
         self.output = inputs.reshape((inputs.shape[0], -1))
 
     def backward(self, dvalues):
