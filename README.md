@@ -5,7 +5,7 @@ This is an extensions of my other project: [Neural Network From Scratch](https:/
 Report can be found ![here](/stuffForReadMe/CNNReport.pdf)
 
 Goal:  
-![Your result image placeholder](/imagesForReadMe/LeNetArchitecture.png)
+![Your result image placeholder](/stuffForReadMe/LeNetArchitecture.png)
 
 LeNet
 - Image: 28 (height) x 28 (width) x 1 (channel)
@@ -24,7 +24,7 @@ The Feedforward consists of 3 dense layers also using the sigmoid activation fun
 
 Result:
 
-![Your result image placeholder](/imagesForReadMe/myArchitecture.png)
+![Your result image placeholder](/stuffForReadMe/myArchitecture.png)
 
 ## Training Files
 
