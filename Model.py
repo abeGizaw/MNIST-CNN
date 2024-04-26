@@ -1,6 +1,7 @@
 import time
 from FeedForward import (LossCategoricalCrossEntropy, ActivationSoftmax,
                          ActivationSoftmax_Loss_CategoricalCrossEntropy, InputLayer)
+from colorama import Fore, Style
 class Model:
     def __init__(self, statTracker):
         self.layers = []
@@ -124,6 +125,8 @@ class Model:
                     self.statTracker.add_time("step", total_train_time)
                     print(f'step:{step}, acc:{accuracy:.3f}, loss:{loss:.3f}')
                     print(f'step took {total_train_time:.2f} seconds')
+                    if accuracy <= .1 and step >= 64:
+                        print(f'{Fore.RED} WARNING: Most Likely Need to Restart This run :( {Style.RESET_ALL}')
 
 
             epoch_data_loss = self.loss.calculate_accumulated()
@@ -134,6 +137,8 @@ class Model:
             self.statTracker.record_epoch_accuracy(epoch, epoch_accuracy)
             print(f'epoch:{epoch}, acc:{epoch_accuracy:.3f}, loss:{epoch_data_loss:.3f}')
             print(f'epoch took {total_epoch_time:.2f} seconds\n')
+            if epoch_accuracy < .2:
+                print(f'{Fore.RED} WARNING: Most Likely Need to Restart This run :( {Style.RESET_ALL}')
 
 
     def validate(self, *, validation_data, batch_size = None, print_every = 100):
