@@ -2,7 +2,8 @@
 This repo features my implementation of a LeNet Convolutional Neural Network (CNN) model built from scratch in Python. It recreates the architecture of LeNet, specifically designed for the classification of handwritten digits. The focus lies on replicating the original structure and parameters of LeNet, offering a detailed walkthrough of the results of different architectures
 
 This is an extensions of my other project: [Neural Network From Scratch](https://github.com/abeGizaw/NeuralNetworkStarter)  
-Full report can be found [CNN Report.pdf](https://github.com/abeGizaw/MNIST-CNN/files/15135179/CNN.Report.pdf)
+Full report can be found [CNN Report.pdf](https://github.com/abeGizaw/MNIST-CNN/files/15135255/CNN.Report.1.pdf)
+
 
 Goal:  
 ![LeNet Architecture](https://github.com/abeGizaw/MNIST-CNN/assets/137833934/de1e4820-d869-4471-9d29-8f78593ba84a)
