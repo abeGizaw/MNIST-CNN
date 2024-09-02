@@ -60,6 +60,37 @@ class ActivationReLU:
     def predictions(outputs):
         return outputs
 
+class ActivationTanh:
+    def __init__(self):
+        self.inputs = None
+        self.output = None
+        self.dinputs = None
+
+    def forward(self, inputs):
+        """
+        :param inputs: values from the previous layer or input data
+        :return: tanh of the input values
+        """
+        self.inputs = inputs
+        self.output = np.tanh(inputs)
+
+    def backward(self, dvalues):
+        """
+        Compute the gradient of the loss with respect to the inputs of this layer.
+        :param dvalues: Gradient of the loss with respect to the output of this layer
+        :return: The derivative of tanh, which is 1 - (output of tanh)^2
+        """
+        self.dinputs = dvalues * (1 - np.power(self.output, 2))
+
+    @staticmethod
+    def predictions(outputs):
+        """
+        Convert tanh output to predicted class index.
+        :param outputs: The outputs of the tanh activation function from the last layer
+        :return: The index of the highest value for each sample, interpreted as the class label
+        """
+        return np.argmax(outputs, axis=1)
+
 
 # Will Fill In Later
 class ActivationSigmoid:

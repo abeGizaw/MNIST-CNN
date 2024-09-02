@@ -1,4 +1,11 @@
 import numpy as np
+import matplotlib.pyplot as plt
+
+def plot_mnist_image(image, label):
+    plt.imshow(image, cmap='gray')  # Plot the image - note that the data must be in 2D
+    plt.title(f'Label: {label}')
+    plt.colorbar()  # Optional, it shows the color bar
+    plt.show()
 def load_mnist_images(filename):
     with open(filename, 'rb') as f:
         # magic number. We don't need to keep track of them
@@ -21,8 +28,8 @@ def load_mnist_labels(filename):
 
 def formatData(train_images, test_images, train_labels, test_labels, *, flatten = False):
     # Normalize data
-    X_train = (np.array(train_images) > 0).astype(np.float32)
-    X_test = (np.array(test_images) > 0).astype(np.float32)
+    X_train = (np.array(train_images) > 64).astype(np.float32)
+    X_test = (np.array(test_images) > 64).astype(np.float32)
 
     # Reshape to be a list of lists. Inner lists contain an output
     # from 0-9 per each output neuron
