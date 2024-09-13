@@ -34,7 +34,7 @@ model.add(ActivationSoftmax())
 
 
 model.set(loss = LossCategoricalCrossEntropy(),
-          optimizer = OptimizerSGD(learning_rate = 0.5),
+          optimizer = OptimizerSGD(learning_rate = 0.5, decay=0.0003),
           accuracy = AccuracyCategorical())
 
 # Finishing touches

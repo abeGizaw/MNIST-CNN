@@ -117,8 +117,10 @@ class Model:
                 # Backward pass
                 self.backward(output, batch_y)
 
+                self.optimizer.pre_update_params()
                 for layer in self.trainable_layers:
                     self.optimizer.update_params(layer)
+                self.optimizer.post_update_params()
 
                 total_train_time = time.time() - train_time_s
                 if batch_size is not None and step % print_every == 0 and step != 0:
