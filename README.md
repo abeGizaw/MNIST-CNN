@@ -2,7 +2,8 @@
 This repo features my implementation of a LeNet Convolutional Neural Network (CNN) model built from scratch in Python. It recreates the architecture of LeNet, specifically designed for the classification of handwritten digits. The focus lies on replicating the original structure and parameters of LeNet, offering a detailed walkthrough of the results of different architectures
 
 This is an extensions of my other project: [Neural Network From Scratch](https://github.com/abeGizaw/NeuralNetworkStarter)  
-Full report can be found [CNN Report.pdf](https://github.com/abeGizaw/MNIST-CNN/files/15135255/CNN.Report.1.pdf)
+Full report can be found here: [CNN Report.pdf](https://github.com/user-attachments/files/16988329/CNN.Report.pdf)
+)
 
 
 Goal:  
@@ -118,6 +119,9 @@ If we were to do more than 3 iterations for the more complex networks, I am very
 I plan on doing some more research on why the model does end up breaking. This will just be an in depth look at what’s happening with the weights and biases when my accuracies aren’t increasing, or suddenly decrease a lot. With this information, I will probably add some extra features such as reducing the learning rate as the training progresses, regularization, etc.  
 
 I also want my stats tracker to flag these defect iterations, and not include them (at user’s discretion) in the model’s statistics. I could use this to track the weights and biases and track them seperatly from the good runs. 
+
+# Other Features Added  
+- Learning Rate Decay
 # References
 
 1. [LeCun's article on using CNNs for MNIST recognition](https://www.rose-hulman.edu/class/cs/csse413/assignments/cnn/Lecun98.pdf)
